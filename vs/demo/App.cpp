@@ -80,8 +80,8 @@ void App::OnStart()
 	// 3D
 	m_missileSpeed = 10.0f;
 	m_pEarth = cpuEngine.CreateEntity();
-	m_pEarth->pMesh = &m_meshSphere;
-	m_pEarth->pMaterial = &m_materialEarth;
+	//m_pEarth->pMesh = &m_meshSphere;
+	//m_pEarth->pMaterial = &m_materialEarth;
 	m_pEarth->transform.pos.x = 3.0f;
 	m_pEarth->transform.pos.y = 3.0f;
 	m_pEarth->transform.pos.z = 5.0f;
@@ -90,13 +90,25 @@ void App::OnStart()
 	m_pMoon->pMaterial = &m_materialMoon;
 	m_pMoon->transform.SetScaling(0.1f);
 
+	//cpu_mesh mesh;
+	//mesh.CreateCube(0.5f, CPU_RED);
+
+	//cpu_material material;
+	//material.color = cpu::ToColor(255, 128, 0);
+	//cpu_entity* test = cpuEngine.CreateEntity();
+	//test->pMesh = &mesh;
+	//test->pMaterial = &material;
+	//test->transform.pos.x = 3.0f;
+	//test->transform.pos.y = 3.0f;
+	//test->transform.pos.z = 5.0f;
+
 	// Ship
 	m_pShip = new Ship;
 	m_pShip->Create(&m_meshShip, &m_materialShip);
 	m_pShip->GetFSM()->ToState(CPU_ID(StateShipIdle));
 
 	// Particle
-	cpuEngine.GetParticleData()->Create(2000000);
+	cpuEngine.GetParticleData()->Create(1000000);
 	cpuEngine.GetParticlePhysics()->gy = -0.5f;
 	m_pEmitter = cpuEngine.CreateParticleEmitter();
 	m_pEmitter->rate = 1.0f;
@@ -104,8 +116,8 @@ void App::OnStart()
 	m_pEmitter->colorMax = cpu::ToColor(255, 128, 0);
 	m_pEmitter2 = cpuEngine.CreateParticleEmitter();
 	m_pEmitter2->rate = 0.25f;
-	m_pEmitter2->colorMin = cpu::ToColor(0, 0, 255);
-	m_pEmitter2->colorMax = cpu::ToColor(0, 128, 255);
+	m_pEmitter2->colorMin = cpu::ToColor(76, 0, 153);
+	m_pEmitter2->colorMax = cpu::ToColor(255, 51, 255);
 	m_pEmitter2->pos.x = -2.0f;
 
 	// Test
@@ -114,18 +126,18 @@ void App::OnStart()
 	//m_pEmitter->colorMax = cpu::ToColor(16, 16, 16);
 
 	// Debug: texture
-	//float roomSize = 100.0f;
-	//cpu_mesh* pMesh = new cpu_mesh;
-	//pMesh->CreatePlane(roomSize, roomSize);
-	//XMMATRIX matrix = XMMatrixRotationX(XM_PIDIV2);
-	//pMesh->Transform(matrix);
-	//matrix = XMMatrixTranslation(0.0f, -2.0f, 0.0f);
-	//pMesh->Transform(matrix);
-	//pMesh->Optimize();
-	//cpu_entity* pE = cpuEngine.CreateEntity();
-	//pE->pMesh = pMesh;
-	//pE->pMaterial = new cpu_material;
-	//pE->pMaterial->pTexture = &m_textureEarth;
+	/*float roomsize = 100.0f;
+	cpu_mesh* pmesh = new cpu_mesh;
+	pmesh->createplane(roomsize, roomsize);
+	xmmatrix matrix = xmmatrixrotationx(xm_pidiv2);
+	pmesh->transform(matrix);
+	matrix = xmmatrixtranslation(0.0f, -2.0f, 0.0f);
+	pmesh->transform(matrix);
+	pmesh->optimize();
+	cpu_entity* pe = cpuengine.createentity();
+	pe->pmesh = pmesh;
+	pe->pmaterial = new cpu_material;
+	pe->pmaterial->ptexture = &m_textureearth;*/
 
 	// Camera
 	cpuEngine.GetCamera()->transform.pos.z = -5.0f;
@@ -142,10 +154,11 @@ void App::OnUpdate()
 	m_pSprite->y = 60 + cpu::RoundToInt(sinf(time)*20.0f);
 
 	// Turn earth
-	m_pEarth->transform.AddYPR(-dt);
+	//m_pEarth->transform.AddYPR(-dt);
 
 	// Move rock
-	m_pMoon->transform.OrbitAroundAxis(m_pEarth->transform.pos, CPU_VEC3_UP, 3.0f, time*2.0f);
+	m_pShip->GetEntity()->transform.OrbitAroundAxis(m_pEarth->transform.pos, CPU_VEC3_UP, 3.0f, time * 2.0f);
+	m_pMoon->transform.OrbitAroundAxis(m_pShip->GetEntity()->transform.pos, CPU_VEC3_RIGHT, 3.0f, time * 2.0f);
 	m_pEmitter->pos = m_pMoon->transform.pos;
 	m_pEmitter->dir = m_pMoon->transform.dir;
 	m_pEmitter->dir.x = -m_pEmitter->dir.x; 
@@ -154,6 +167,7 @@ void App::OnUpdate()
 
 	// Turn camera
 	cpuEngine.GetCamera()->transform.AddYPR(0.0f, 0.0f, dt*0.1f);
+	cpuEngine.GetCamera()->transform.OrbitAroundAxis(m_pShip->GetEntity()->transform.pos, CPU_VEC3_DIR, 1.0f, time * 1.5f);
 
 	// Move ship
 	if ( cpuInput.IsUp() )
@@ -233,7 +247,7 @@ void App::OnRender(int pass)
 			info += CPU_STR(m_missiles.size()) + " missiles, ";
 			info += CPU_STR(cpuEngine.GetParticleData()->alive) + " particles, ";
 			info += CPU_STR(stats.threadCount) + " threads, ";
-			info += CPU_STR(stats.tileCount) + " tiles";
+			info += CPU_STR(stats.tileCount) + " bonjour";
 
 			// Ray cast
 			cpu_ray ray;
