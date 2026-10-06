@@ -10,6 +10,9 @@
 	#pragma comment(lib, "../x64/Release/cpu-engine.lib")
 #endif
 
+#include <SDKDDKVer.h>
 #include "../cpu-engine/cpu-engine.h"
+
+class Ship;
 
 #include "App.h"

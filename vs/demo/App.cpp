@@ -53,7 +53,7 @@ void App::OnStart()
 	// YOUR CODE HERE
 
 	// Render
-	//cpuEngine.EnableBoxRender();
+	cpuEngine.EnableBoxRender();
 
 	// Resources
 	m_font.Create(cpuDevice.GetHeight()<=512 ? 14 : 28);
@@ -321,7 +321,7 @@ void Ship::Update()
 	float dt = cpuTime.delta;
 
 	// Turn ship
-	m_pEntity->transform.AddYPR(dt, dt, dt);
+	//m_pEntity->transform.AddYPR(dt, dt, dt);
 
 	// Move ship
 	m_pEntity->transform.pos.z += dt * 1.0f;
