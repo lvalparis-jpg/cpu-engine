@@ -33,7 +33,11 @@ void App::OnStart()
 	// YOUR CODE HERE
 	// 
 	// Render
+#ifdef _DEBUG
 	cpuEngine.EnableBoxRender();
+#endif // DEBUG
+
+	
 
 	// Resources
 	m_font.Create(cpuDevice.GetHeight() <= 512 ? 14 : 28);
@@ -42,10 +46,12 @@ void App::OnStart()
 	m_meshShip.CreateSpaceship();
 	m_meshMissile.CreateSphere(0.5f);
 	m_meshSphere.CreateSphere(2.0f, 8, 8);
-	m_meshRail.CreateTube();
+	m_meshRail.CreateTube(0.5f,3.0f,60);
 	m_meshCube.CreateCube();
 	m_meshCenter.CreateSphere();
 	m_pCenter = cpuEngine.CreateEntity();
+	m_pRail = cpuEngine.CreateEntity();
+	
 	m_rts[0] = cpuEngine.CreateRT();
 
 	m_base_material.color = cpu::ToColor(220, 220, 220);
@@ -64,6 +70,12 @@ void App::OnStart()
 	m_materialEarth.pTexture = &m_textureEarth;
 
 
+	m_pRail->pMesh = &m_meshRail;
+	m_pRail->pMaterial = &m_base_material;
+
+	m_pRail->transform.pos.x = 0.0f;
+	m_pRail->transform.pos.y = -2.0f;
+	m_pRail->transform.pos.z = 0.0f;
 
 #ifdef _DEBUG
 	m_pCenter->pMesh = &m_meshCenter;
@@ -73,6 +85,7 @@ void App::OnStart()
 	m_pCenter->transform.pos.x = 0.0f;
 	m_pCenter->transform.pos.y = 0.0f;
 	m_pCenter->transform.pos.z = 0.0f;
+
 
 
 	// 3D
@@ -106,6 +119,7 @@ void App::OnStart()
 	m_pShip = new Ship;
 	m_pShip->Create(&m_meshShip, &m_materialShip);
 	m_pShip->GetFSM()->ToState(CPU_ID(StateShipIdle));
+
 #ifdef _DEBUG
 
 	cpuEngine.GetCamera()->transform.pos = XMFLOAT3(0, 20, 0);
@@ -161,21 +175,19 @@ void App::OnUpdate()
 	m_angle += m_velocity * dt;
 
 	// Turn camera
-	//cpuEngine.GetCamera()->transform.AddYPR(0.0f, 0.0f, 0.0f);
-	//m_pShip->GetEntity()->transform.OrbitAroundAxis(m_pMoon->transform.pos, CPU_VEC3_RIGHT, 3.0f, m_angle);
 
 #ifdef _DEBUG
 
 	cpuEngine.GetCamera()->transform.LookAt(m_pCenter->transform.pos.x, m_pCenter->transform.pos.y, m_pCenter->transform.pos.z,CPU_VEC3_RIGHT);
 
 #else
-	cpuEngine.GetCamera()->transform.OrbitAroundAxis(m_pShip->transform.pos, CPU_VEC3_UP, 10.0f, m_angle);
+	cpuEngine.GetCamera()->transform.OrbitAroundAxis(m_pShip->GetEntity()->transform.pos, CPU_VEC3_UP, 10.0f, m_angle);
+	cpuEngine.GetCamera()->transform.LookAt(m_pCenter->transform.pos.x, m_pCenter->transform.pos.y, m_pCenter->transform.pos.z, CPU_VEC3_UP);
 
 #endif
-
 	
 	m_pShip->GetEntity()->transform.OrbitAroundAxis(m_pCenter->transform.pos, CPU_VEC3_UP, 3.0f, m_angle);
-	//cpuEngine.GetCamera()->transform.LookAt(m_pMoon->transform.pos, CPU_VEC3_RIGHT, 6.0f, m_angle);
+	m_pShip->GetEntity()->transform.LookAt(m_pCenter->transform.pos.x, m_pCenter->transform.pos.y, m_pCenter->transform.pos.z, CPU_VEC3_UP);
 	//cpuEngine.GetCamera()->transform.LookAt(m_pShip->GetEntity()->transform.pos.x, cpuEngine.GetCamera()->transform.pos.y, m_pShip->GetEntity()->transform.pos.z, CPU_VEC3_UP);
 	
 

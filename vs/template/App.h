@@ -50,6 +50,7 @@ private:
 	cpu_entity* m_pEarth;
 	cpu_entity* m_pMoon;
 	cpu_entity* m_pCenter = nullptr;
+	cpu_entity* m_pRail = nullptr;
 	
 	//cpu_particle_emitter* m_pEmitter;
 	//cpu_particle_emitter* m_pEmitter2;
