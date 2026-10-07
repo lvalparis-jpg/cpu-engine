@@ -65,6 +65,17 @@ private:
 	int m_score = 0;
 	int m_pv = 3;
 
+	// Spawn des missiles
+	float m_spawnMin = 0.5f;      // délai min entre deux missiles (s)
+	float m_spawnMax = 2.0f;      // délai max (s)
+	float m_spawnTimer = 0.0f;
+	float m_nextSpawn = 1.0f;
+	float m_spawnRadius = 3.0f;   // rayon de l'anneau (à ajuster selon ton mesh)
+
+	float RandRange(float a, float b);
+	void SpawnMissileFromRing();
+	void ScheduleNextSpawn();
+
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -1,4 +1,5 @@
 #include "pch.h"
+#include <iostream>
 
 App::App()
 {
@@ -131,6 +132,8 @@ void App::OnStart()
 	m_pShip->Create(&m_meshShip, &m_materialShip);
 	m_pShip->GetFSM()->ToState(CPU_ID(StateShipIdle));
 
+	ScheduleNextSpawn();
+
 #ifdef _DEBUG
 
 	cpuEngine.GetCamera()->transform.pos = XMFLOAT3(0.0f, 50.0f, 0.0f);
@@ -201,21 +204,29 @@ void App::OnUpdate()
 	m_pShip->GetEntity()->transform.OrbitAroundAxis(m_pCenter->transform.pos, CPU_VEC3_UP, 3.0f, m_angle);
 	m_pShip->GetEntity()->transform.LookAt(m_pCenter->transform.pos.x, m_pCenter->transform.pos.y, m_pCenter->transform.pos.z, CPU_VEC3_UP);
 	//cpuEngine.GetCamera()->transform.LookAt(m_pShip->GetEntity()->transform.pos.x, cpuEngine.GetCamera()->transform.pos.y, m_pShip->GetEntity()->transform.pos.z, CPU_VEC3_UP);
-	
+
+	// Spawn aléatoire
+	m_spawnTimer += dt;
+	if (m_spawnTimer >= m_nextSpawn)
+	{
+		SpawnMissileFromRing();
+		ScheduleNextSpawn();
+	}
 
 	// Move missiles
 	for (auto it = m_missiles.begin(); it != m_missiles.end(); ++it)
 	{
 		cpu_entity* pMissile = *it;
 		pMissile->transform.Move(dt * m_missileSpeed);
-		if (pMissile->transform.pos.y <= m_pDropRail->transform.pos.y)
+
+		if (m_pShip->GetEntity()->aabb.Contains(pMissile->transform.pos))
 		{
-			m_pv = m_pv - 1;
+			m_score++;
 			cpuEngine.Release(pMissile);
 		}
-		else if (m_pShip->GetEntity()->aabb.Contains(pMissile->transform.pos))
+		else if (pMissile->transform.pos.y <= m_pRail->transform.pos.y)
 		{
-			m_score = m_score + 1;
+			m_pv--;
 			cpuEngine.Release(pMissile);
 		}
 		else if (pMissile->lifetime > 10.0f)
@@ -232,7 +243,7 @@ void App::OnUpdate()
 	}
 
 	// Quit
-	if (cpuInput.IsBackPressed())
+	if (cpuInput.IsBackPressed() || m_pv == 0)
 		cpuEngine.Quit();
 }
 
@@ -243,6 +254,11 @@ void App::OnExit()
 		m_pShip->Destroy();
 	CPU_DELPTR(m_pShip);
 	m_missiles.clear();
+
+	/*std::cout << "Score: " << m_score << std::endl;
+	std::cout << "Tu as perdu" << std::endl;
+	std::cout << "Press any key to retry..." << std::endl;
+	std::cin.get();*/
 }
 
 void App::OnRender(int pass)
@@ -289,7 +305,13 @@ void App::OnRender(int pass)
 
 #endif // _DEBUG
 
-		
+		if (m_pv <= 0)
+		{
+			info += " - GAME OVER";
+			break;
+		}
+			
+
 
 		// Ray cast
 		cpu_ray ray;
@@ -307,6 +329,37 @@ void App::OnRender(int pass)
 		break;
 	}
 	}
+}
+
+float App::RandRange(float a, float b)
+{
+	return a + (b - a) * (std::rand() / (float)RAND_MAX);
+}
+
+void App::ScheduleNextSpawn()
+{
+	m_spawnTimer = 0.0f;
+	m_nextSpawn = RandRange(m_spawnMin, m_spawnMax);
+}
+
+void App::SpawnMissileFromRing()
+{
+	float a = RandRange(0.0f, XM_2PI);
+	float x = m_pDropRail->transform.pos.x + cosf(a) * m_spawnRadius;
+	float z = m_pDropRail->transform.pos.z + sinf(a) * m_spawnRadius;
+	float y = m_pDropRail->transform.pos.y;
+
+	cpu_entity* pMissile = cpuEngine.CreateEntity();
+	pMissile->pMesh = &m_meshMissile;
+	pMissile->pMaterial = &m_materialMissile;
+	pMissile->transform.SetScaling(0.2f);
+	pMissile->transform.pos = XMFLOAT3(x, y, z);
+
+	// Orienter le missile droit vers le bas
+	// (up = RIGHT car regarder vers le bas avec UP est dégénéré)
+	pMissile->transform.LookAt(x, y - 10.0f, z, CPU_VEC3_RIGHT);
+
+	m_missiles.push_back(pMissile);
 }
 
 void App::MyPixelShader(cpu_ps_io& io)
