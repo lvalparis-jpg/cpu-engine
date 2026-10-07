@@ -37,7 +37,7 @@ void App::OnStart()
 	cpuEngine.EnableBoxRender();
 #endif // DEBUG
 
-	
+	std::srand(std::time(0));
 
 	// Resources
 	m_font.Create(cpuDevice.GetHeight() <= 512 ? 14 : 28);
@@ -46,15 +46,18 @@ void App::OnStart()
 	m_meshShip.CreateSpaceship();
 	m_meshMissile.CreateSphere(0.5f);
 	m_meshSphere.CreateSphere(2.0f, 8, 8);
-	m_meshRail.CreateTube(0.5f,3.0f,60);
+	m_meshRail.CreateCylinder(0.5f,5.0f,60);
+	m_meshDropRail.CreateTube(0.5f, 3.0f, 60);
 	m_meshCube.CreateCube();
 	m_meshCenter.CreateSphere();
 	m_pCenter = cpuEngine.CreateEntity();
 	m_pRail = cpuEngine.CreateEntity();
+	m_pDropRail = cpuEngine.CreateEntity();
 	
 	m_rts[0] = cpuEngine.CreateRT();
 
 	m_base_material.color = cpu::ToColor(220, 220, 220);
+	m_ball_color.color = cpu::ToColor(255, 0, 0);
 
 	// UI
 	m_pSprite = cpuEngine.CreateSprite();
@@ -69,18 +72,26 @@ void App::OnStart()
 	m_materialMoon.ps = MoonShader;
 	m_materialEarth.pTexture = &m_textureEarth;
 
+	m_pDropRail->pMesh = &m_meshDropRail;
+	m_pDropRail->pMaterial = &m_base_material;
+
+	m_pDropRail->transform.pos.x = 0.0f;
+	m_pDropRail->transform.pos.y = 40.0f;
+	m_pDropRail->transform.pos.z = 0.0f;
 
 	m_pRail->pMesh = &m_meshRail;
-	m_pRail->pMaterial = &m_base_material;
+	m_pRail->pMaterial = &m_materialMoon;
 
 	m_pRail->transform.pos.x = 0.0f;
-	m_pRail->transform.pos.y = -2.0f;
+	m_pRail->transform.pos.y = -1.7f;
 	m_pRail->transform.pos.z = 0.0f;
 
 #ifdef _DEBUG
+
 	m_pCenter->pMesh = &m_meshCenter;
 	m_pCenter->pMaterial = &m_base_material;
-#endif _DEBUG
+
+#endif // DEBUG
 
 	m_pCenter->transform.pos.x = 0.0f;
 	m_pCenter->transform.pos.y = 0.0f;
@@ -122,11 +133,11 @@ void App::OnStart()
 
 #ifdef _DEBUG
 
-	cpuEngine.GetCamera()->transform.pos = XMFLOAT3(0, 20, 0);
+	cpuEngine.GetCamera()->transform.pos = XMFLOAT3(0.0f, 50.0f, 0.0f);
 
 #else
 
-	cpuEngine.GetCamera()->transform.pos = XMFLOAT3(0, 0, -10);
+	cpuEngine.GetCamera()->transform.pos = XMFLOAT3(0.0f, 30.0f, -20.0f);
 
 #endif 
 }
@@ -181,7 +192,8 @@ void App::OnUpdate()
 	cpuEngine.GetCamera()->transform.LookAt(m_pCenter->transform.pos.x, m_pCenter->transform.pos.y, m_pCenter->transform.pos.z,CPU_VEC3_RIGHT);
 
 #else
-	cpuEngine.GetCamera()->transform.OrbitAroundAxis(m_pShip->GetEntity()->transform.pos, CPU_VEC3_UP, 10.0f, m_angle);
+
+	//cpuEngine.GetCamera()->transform.OrbitAroundAxis(m_pShip->GetEntity()->transform.pos, CPU_VEC3_UP, 10.0f, m_angle);
 	cpuEngine.GetCamera()->transform.LookAt(m_pCenter->transform.pos.x, m_pCenter->transform.pos.y, m_pCenter->transform.pos.z, CPU_VEC3_UP);
 
 #endif
@@ -196,7 +208,17 @@ void App::OnUpdate()
 	{
 		cpu_entity* pMissile = *it;
 		pMissile->transform.Move(dt * m_missileSpeed);
-		if (pMissile->lifetime > 10.0f)
+		if (pMissile->transform.pos.y <= m_pDropRail->transform.pos.y)
+		{
+			m_pv = m_pv - 1;
+			cpuEngine.Release(pMissile);
+		}
+		else if (m_pShip->GetEntity()->aabb.Contains(pMissile->transform.pos))
+		{
+			m_score = m_score + 1;
+			cpuEngine.Release(pMissile);
+		}
+		else if (pMissile->lifetime > 10.0f)
 			cpuEngine.Release(pMissile);
 	}
 
@@ -245,6 +267,8 @@ void App::OnRender(int pass)
 	case CPU_PASS_UI_END:
 	{
 		// Debug
+#ifdef _DEBUG
+
 		cpu_stats& stats = *cpuEngine.GetStats();
 		std::string info = CPU_STR(cpuTime.fps) + " fps, ";
 		info += CPU_STR(stats.drawnTriangleCount) + " triangles, ";
@@ -256,6 +280,16 @@ void App::OnRender(int pass)
 		info += CPU_STR(cpuEngine.GetCamera()->transform.pos.x) + " : X, ";
 		info += CPU_STR(cpuEngine.GetCamera()->transform.pos.y) + " : Y, ";
 		info += CPU_STR(cpuEngine.GetCamera()->transform.pos.z) + " : Z ";
+
+#else
+
+		std::string info = CPU_STR(cpuTime.fps) + " fps, ";
+		info += CPU_STR(m_score) + " : score, ";
+		info += CPU_STR(m_pv) + " : vie";
+
+#endif // _DEBUG
+
+		
 
 		// Ray cast
 		cpu_ray ray;
@@ -340,8 +374,8 @@ void Ship::Update()
 	//m_pEntity->transform.pos.z += dt * 1.0f;
 
 	// Fire
-	if (cpuInput.vi.IsKey(VK_SPACE))
-		cpuApp.SpawnMissile();
+	/*if (cpuInput.vi.IsKey(VK_SPACE))
+		cpuApp.SpawnMissile();*/
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

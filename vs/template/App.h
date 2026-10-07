@@ -27,6 +27,7 @@ private:
 	cpu_mesh m_meshMissile;
 	cpu_mesh m_meshSphere;
 	cpu_mesh m_meshRail;
+	cpu_mesh m_meshDropRail;
 	cpu_mesh m_meshCube;
 	cpu_mesh m_meshCenter;
 	cpu_texture m_textureBird;
@@ -42,6 +43,7 @@ private:
 	cpu_material m_materialMoon;
 	cpu_material m_materialEarth;
 	cpu_material m_base_material;
+	cpu_material m_ball_color;
 
 	// 3D
 	Ship* m_pShip;
@@ -51,6 +53,7 @@ private:
 	cpu_entity* m_pMoon;
 	cpu_entity* m_pCenter = nullptr;
 	cpu_entity* m_pRail = nullptr;
+	cpu_entity* m_pDropRail = nullptr;
 	
 	//cpu_particle_emitter* m_pEmitter;
 	//cpu_particle_emitter* m_pEmitter2;
@@ -58,6 +61,9 @@ private:
 	float m_velocity;
 	float m_angle = 0.0f;
 	float m_speed;
+
+	int m_score = 0;
+	int m_pv = 3;
 
 };
 
