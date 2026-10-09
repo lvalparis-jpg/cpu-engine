@@ -18,18 +18,6 @@ App::~App()
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//void App::SpawnMissile()
-//{
-//	cpu_entity* pMissile = cpuEngine.CreateEntity();
-//	pMissile->pMesh = &m_meshMissile;
-//	pMissile->transform.SetScaling(0.2f);
-//	pMissile->transform.pos = m_pShip->GetEntity()->transform.pos;
-//	pMissile->transform.SetRotation(m_pShip->GetEntity()->transform);
-//	pMissile->transform.Move(1.5f);
-//	m_missiles.push_back(pMissile);
-//
-//}
-
 void App::OnStart()
 {
 	// YOUR CODE HERE
@@ -79,14 +67,14 @@ void App::OnStart()
 	m_materialEarth.pTexture = &m_textureEarth;
 
 	m_pDropRail->pMesh = &m_meshDropRail;
+	m_pRail->pMesh = &m_meshRail;
+
 	m_pDropRail->pMaterial = &m_base_material;
+	m_pRail->pMaterial = &m_materialMoon;
 
 	m_pDropRail->transform.pos.x = 0.0f;
 	m_pDropRail->transform.pos.y = 40.0f;
 	m_pDropRail->transform.pos.z = 0.0f;
-
-	m_pRail->pMesh = &m_meshRail;
-	m_pRail->pMaterial = &m_materialMoon;
 
 	m_pRail->transform.pos.x = 0.0f;
 	m_pRail->transform.pos.y = -1.7f;
@@ -265,8 +253,6 @@ void App::OnRender(int pass)
 			info += " - GAME OVER";
 			break;
 		}
-			
-
 
 		// Ray cast
 		cpu_ray ray;
