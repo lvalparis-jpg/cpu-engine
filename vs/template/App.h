@@ -1,4 +1,5 @@
 #pragma once
+#include "Missile.h"
 
 class App
 {
@@ -22,14 +23,19 @@ public:
 private:
 	inline static App* s_pApp = nullptr;
 
+	Missile_Manager mm;
+
 	cpu_font m_font;
 	cpu_mesh m_meshShip;
-	cpu_mesh m_meshMissile;
+	
 	cpu_mesh m_meshSphere;
 	cpu_mesh m_meshRail;
 	cpu_mesh m_meshDropRail;
 	cpu_mesh m_meshCube;
 	cpu_mesh m_meshCenter;
+	cpu_mesh m_meshMissile;
+	cpu_mesh m_meshShadow;
+	
 	cpu_texture m_textureBird;
 	cpu_texture m_textureEarth;
 	cpu_rt* m_rts[1];
@@ -38,8 +44,9 @@ private:
 	cpu_sprite* m_pSprite;
 
 	// Shader
-	cpu_material m_materialShip;
 	cpu_material m_materialMissile;
+	cpu_material m_materialShadow;
+	cpu_material m_materialShip;
 	cpu_material m_materialMoon;
 	cpu_material m_materialEarth;
 	cpu_material m_base_material;
@@ -47,16 +54,12 @@ private:
 
 	// 3D
 	Ship* m_pShip;
-	std::list<cpu_entity*> m_missiles;
 	float m_missileSpeed;
 	cpu_entity* m_pEarth;
 	cpu_entity* m_pMoon;
 	cpu_entity* m_pCenter = nullptr;
 	cpu_entity* m_pRail = nullptr;
 	cpu_entity* m_pDropRail = nullptr;
-	
-	//cpu_particle_emitter* m_pEmitter;
-	//cpu_particle_emitter* m_pEmitter2;
 
 	float m_velocity;
 	float m_angle = 0.0f;

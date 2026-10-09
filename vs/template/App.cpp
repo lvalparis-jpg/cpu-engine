@@ -18,24 +18,27 @@ App::~App()
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void App::SpawnMissile()
-{
-	cpu_entity* pMissile = cpuEngine.CreateEntity();
-	pMissile->pMesh = &m_meshMissile;
-	pMissile->transform.SetScaling(0.2f);
-	pMissile->transform.pos = m_pShip->GetEntity()->transform.pos;
-	pMissile->transform.SetRotation(m_pShip->GetEntity()->transform);
-	pMissile->transform.Move(1.5f);
-	m_missiles.push_back(pMissile);
-}
+//void App::SpawnMissile()
+//{
+//	cpu_entity* pMissile = cpuEngine.CreateEntity();
+//	pMissile->pMesh = &m_meshMissile;
+//	pMissile->transform.SetScaling(0.2f);
+//	pMissile->transform.pos = m_pShip->GetEntity()->transform.pos;
+//	pMissile->transform.SetRotation(m_pShip->GetEntity()->transform);
+//	pMissile->transform.Move(1.5f);
+//	m_missiles.push_back(pMissile);
+//
+//}
 
 void App::OnStart()
 {
 	// YOUR CODE HERE
-	// 
 	// Render
+
 #ifdef _DEBUG
+
 	cpuEngine.EnableBoxRender();
+
 #endif // DEBUG
 
 	std::srand(std::time(0));
@@ -51,6 +54,7 @@ void App::OnStart()
 	m_meshDropRail.CreateTube(0.5f, 3.0f, 60);
 	m_meshCube.CreateCube();
 	m_meshCenter.CreateSphere();
+	m_meshShadow.CreateCircle();
 	m_pCenter = cpuEngine.CreateEntity();
 	m_pRail = cpuEngine.CreateEntity();
 	m_pDropRail = cpuEngine.CreateEntity();
@@ -59,6 +63,7 @@ void App::OnStart()
 
 	m_base_material.color = cpu::ToColor(220, 220, 220);
 	m_ball_color.color = cpu::ToColor(255, 0, 0);
+	m_materialShadow.color = cpu::ToColor(0, 0, 0);
 
 	// UI
 	m_pSprite = cpuEngine.CreateSprite();
@@ -98,34 +103,8 @@ void App::OnStart()
 	m_pCenter->transform.pos.y = 0.0f;
 	m_pCenter->transform.pos.z = 0.0f;
 
-
-
 	// 3D
 	m_missileSpeed = 10.0f;
-	/*m_pEarth = cpuEngine.CreateEntity();*/
-	//m_pEarth->pMesh = &m_meshSphere;
-	//m_pEarth->pMaterial = &m_materialEarth;
-	/*m_pEarth->transform.pos.x = 3.0f;
-	m_pEarth->transform.pos.y = 3.0f;
-	m_pEarth->transform.pos.z = 5.0f;*/
-	//m_pMoon = cpuEngine.CreateEntity();
-	//m_pMoon->pMesh = &m_meshSphere;
-	//m_pMoon->pMaterial = &m_materialMoon;
-	//m_pMoon->transform.SetScaling(0.1f);
-
-	
-
-	//cpu_mesh mesh;
-	//mesh.CreateCube(0.5f, CPU_RED);
-
-	//cpu_material material;
-	//material.color = cpu::ToColor(255, 128, 0);
-	//cpu_entity* test = cpuEngine.CreateEntity();
-	//test->pMesh = &mesh;
-	//test->pMaterial = &material;
-	//test->transform.pos.x = 3.0f;
-	//test->transform.pos.y = 3.0f;
-	//test->transform.pos.z = 5.0f;
 
 	// Ship
 	m_pShip = new Ship;
@@ -152,27 +131,6 @@ void App::OnUpdate()
 
 	m_pSprite->y = 60 + cpu::RoundToInt(sinf(time) * 20.0f);
 
-	// Turn earth
-	//m_pEarth->transform.AddYPR(-dt);
-
-	// Move rock
-	/*m_pMoon->transform.OrbitAroundAxis(m_pShip->GetEntity()->transform.pos, CPU_VEC3_RIGHT, 3.0f, time * 2.0f);*/
-	/*m_pEmitter->pos = m_pMoon->transform.pos;
-	m_pEmitter->dir = m_pMoon->transform.dir;
-	m_pEmitter->dir.x = -m_pEmitter->dir.x;
-	m_pEmitter->dir.y = -m_pEmitter->dir.y;
-	m_pEmitter->dir.z = -m_pEmitter->dir.z;*/
-
-	// Move Camera
-	/*if (cpuInput.IsUp())
-		cpuEngine.GetCamera()->transform.Move(dt * 1.0f);
-	if (cpuInput.IsDown())
-		cpuEngine.GetCamera()->transform.Move(-dt * 1.0f);
-	if (cpuInput.IsLeft())
-		cpuEngine.GetCamera()->transform.AddYPR(-dt * XM_PI);
-	if (cpuInput.IsRight())
-		cpuEngine.GetCamera()->transform.AddYPR(dt * XM_PI);*/
-
 	m_speed = XM_PI * 0.5f;
 
 	if (cpuInput.IsUp())
@@ -180,9 +138,9 @@ void App::OnUpdate()
 	if (cpuInput.IsDown())
 		cpuEngine.GetCamera()->transform.AddYPR(0.0f,dt * m_speed,0.0f);
 	if (cpuInput.IsLeft())
-		m_velocity = -2.0f;
+		m_velocity = -3.0f;
 	else if (cpuInput.IsRight())
-		m_velocity = 2.0f;
+		m_velocity = 3.0f;
 	else
 		m_velocity = 0.0f;
 
@@ -196,14 +154,12 @@ void App::OnUpdate()
 
 #else
 
-	//cpuEngine.GetCamera()->transform.OrbitAroundAxis(m_pShip->GetEntity()->transform.pos, CPU_VEC3_UP, 10.0f, m_angle);
 	cpuEngine.GetCamera()->transform.LookAt(m_pCenter->transform.pos.x, m_pCenter->transform.pos.y, m_pCenter->transform.pos.z, CPU_VEC3_UP);
 
 #endif
 	
 	m_pShip->GetEntity()->transform.OrbitAroundAxis(m_pCenter->transform.pos, CPU_VEC3_UP, 3.0f, m_angle);
 	m_pShip->GetEntity()->transform.LookAt(m_pCenter->transform.pos.x, m_pCenter->transform.pos.y, m_pCenter->transform.pos.z, CPU_VEC3_UP);
-	//cpuEngine.GetCamera()->transform.LookAt(m_pShip->GetEntity()->transform.pos.x, cpuEngine.GetCamera()->transform.pos.y, m_pShip->GetEntity()->transform.pos.z, CPU_VEC3_UP);
 
 	// Spawn aléatoire
 	m_spawnTimer += dt;
@@ -214,30 +170,37 @@ void App::OnUpdate()
 	}
 
 	// Move missiles
-	for (auto it = m_missiles.begin(); it != m_missiles.end(); ++it)
+	for (auto it = mm.GetToDestruct().begin(); it != mm.GetToDestruct().end(); ++it)
 	{
-		cpu_entity* pMissile = *it;
+		cpu_entity* pMissile = (*it).first;
+		cpu_entity* pSHadow = (*it).second;
 		pMissile->transform.Move(dt * m_missileSpeed);
 
 		if (m_pShip->GetEntity()->aabb.Contains(pMissile->transform.pos))
 		{
 			m_score++;
 			cpuEngine.Release(pMissile);
+			cpuEngine.Release(pSHadow);
 		}
 		else if (pMissile->transform.pos.y <= m_pRail->transform.pos.y)
 		{
 			m_pv--;
 			cpuEngine.Release(pMissile);
+			cpuEngine.Release(pSHadow);
 		}
 		else if (pMissile->lifetime > 10.0f)
+		{
 			cpuEngine.Release(pMissile);
+			cpuEngine.Release(pSHadow);
+		}
+			
 	}
 
 	// Purge missiles
-	for (auto it = m_missiles.begin(); it != m_missiles.end(); )
+	for (auto it = mm.GetToDestruct().begin(); it != mm.GetToDestruct().end(); )
 	{
-		if ((*it)->dead)
-			it = m_missiles.erase(it);
+		if ((*it).first->dead)
+			it = mm.GetToDestruct().erase(it);
 		else
 			++it;
 	}
@@ -253,12 +216,8 @@ void App::OnExit()
 	if (m_pShip)
 		m_pShip->Destroy();
 	CPU_DELPTR(m_pShip);
-	m_missiles.clear();
+	mm.GetToDestruct().clear();
 
-	/*std::cout << "Score: " << m_score << std::endl;
-	std::cout << "Tu as perdu" << std::endl;
-	std::cout << "Press any key to retry..." << std::endl;
-	std::cin.get();*/
 }
 
 void App::OnRender(int pass)
@@ -289,10 +248,6 @@ void App::OnRender(int pass)
 		std::string info = CPU_STR(cpuTime.fps) + " fps, ";
 		info += CPU_STR(stats.drawnTriangleCount) + " triangles, ";
 		info += CPU_STR(stats.clipEntityCount) + " clipped entities\n";
-		/*info += CPU_STR(m_missiles.size()) + " missiles, ";
-		info += CPU_STR(cpuEngine.GetParticleData()->alive) + " particles, ";*/
-		/*info += CPU_STR(stats.threadCount) + " threads, ";
-		info += CPU_STR(stats.tileCount) + " tiles";*/
 		info += CPU_STR(cpuEngine.GetCamera()->transform.pos.x) + " : X, ";
 		info += CPU_STR(cpuEngine.GetCamera()->transform.pos.y) + " : Y, ";
 		info += CPU_STR(cpuEngine.GetCamera()->transform.pos.z) + " : Z ";
@@ -352,14 +307,19 @@ void App::SpawnMissileFromRing()
 	cpu_entity* pMissile = cpuEngine.CreateEntity();
 	pMissile->pMesh = &m_meshMissile;
 	pMissile->pMaterial = &m_materialMissile;
-	pMissile->transform.SetScaling(0.2f);
+	pMissile->transform.SetScaling(1.0f);
 	pMissile->transform.pos = XMFLOAT3(x, y, z);
 
 	// Orienter le missile droit vers le bas
-	// (up = RIGHT car regarder vers le bas avec UP est dégénéré)
 	pMissile->transform.LookAt(x, y - 10.0f, z, CPU_VEC3_RIGHT);
 
-	m_missiles.push_back(pMissile);
+	cpu_entity* pShadow = cpuEngine.CreateEntity();
+	pShadow->pMesh = &m_meshShadow;
+	pShadow->pMaterial = &m_materialShadow;
+	pShadow->transform.pos = XMFLOAT3(x, m_pRail->transform.pos.y + 0.5f, z);
+
+	mm.GetToDestruct().push_back({ pMissile,pShadow });
+
 }
 
 void App::MyPixelShader(cpu_ps_io& io)
@@ -419,16 +379,6 @@ void Ship::Destroy()
 void Ship::Update()
 {
 	float dt = cpuTime.delta;
-
-	// Turn ship
-	//m_pEntity->transform.AddYPR(dt, dt, dt);
-
-	// Move ship
-	//m_pEntity->transform.pos.z += dt * 1.0f;
-
-	// Fire
-	/*if (cpuInput.vi.IsKey(VK_SPACE))
-		cpuApp.SpawnMissile();*/
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
